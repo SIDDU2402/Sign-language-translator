@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Translation</title>
+    <style>
+        /* Fullscreen background overlay with gradient effect */
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            overflow: hidden;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+        }
+
+        /* Background animation effect */
+        #background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/dark-denim.png'); /* Subtle background pattern */
+            opacity: 0.2;
+            animation: fadeIn 3s ease-in-out infinite alternate;
+        }
+
+        /* Main content container */
+        #main-content {
+            position: relative;
+            text-align: center;
+            z-index: 2;
+        }
+
+        #title {
+            font-size: 2.5rem;
+            margin-top: 20px;
+            animation: fadeInDown 1s ease;
+        }
+
+        #image-container img {
+            width: 200px;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1.5s ease;
+        }
+
+        #video-container {
+            display: none;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background: #ff6b6b;
+            border: none;
+            border-radius: 8px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            outline: none;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background: #ff4b4b;
+        }
+
+        #status-message {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* Keyframe animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="background-overlay"></div> <!-- Background effect overlay -->
+
+    <div id="main-content">
+        <!-- Header image for sign language translation -->
+        <div id="image-container">
+            <img src="{{ url_for('static', filename='images/sign_language_icon.png') }}" alt="Sign Language Icon">
+        </div>
+        
+
+        <!-- Title text -->
+        <h1 id="title">Sign Language Translation</h1>
+
+        <!-- Video feed container -->
+        <div id="video-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" width="640" height="480">
+        </div>
+
+        <!-- Start and Stop buttons -->
+        <div class="buttons">
+            <button onclick="startVideo()">Start Translation</button>
+            <button onclick="stopVideo()">Stop Translation</button>
+        </div>
+
+        <!-- Status message area -->
+        <div id="status-message"></div>
+    </div>
+
+    <script>
+        let videoFeed = document.getElementById('video-feed');
+        let videoContainer = document.getElementById('video-container');
+        let statusMessage = document.getElementById('status-message');
+
+        function showMessage(message, color) {
+            statusMessage.textContent = message;
+            statusMessage.style.color = color;
+            statusMessage.style.opacity = 1;
+            statusMessage.style.animation = "slideIn 0.5s ease";
+            setTimeout(() => {
+                statusMessage.style.opacity = 0;
+            }, 3000);
+        }
+
+        function startVideo() {
+            fetch('/start_video')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "started") {
+                        videoContainer.style.display = 'block';
+                        videoFeed.src = "{{ url_for('video_feed') }}?" + new Date().getTime();
+                        showMessage("Translation Started!", "#00ff00");
+                    }
+                });
+        }
+
+        function stopVideo() {
+            fetch('/stop_video')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "stopped") {
+                        videoContainer.style.display = 'none';
+                        showMessage("Thanks for Using!", "#ff4b4b");
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
